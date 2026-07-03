@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Juri Wiruk - Multi Peserta</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #f0f3f6; color: #333; }
+        .header-panel { text-align: center; background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .header-panel h1 { margin: 0; font-size: 24px; }
+        .control-panel { background: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; display: flex; justify-content: center; align-items: center; gap: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        .control-panel label { font-weight: bold; }
+        .control-panel select { padding: 8px 15px; border-radius: 4px; border: 1px solid #ccc; font-size: 14px; }
+        
+        /* Grid untuk Multi-Peserta */
+        .grid-peserta { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+        
+        /* Card Peserta */
+        .card-peserta { background: white; border-radius: 8px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-top: 5px solid #3498db; display: flex; flex-direction: column; justify-content: space-between; }
+        .card-peserta.p1 { border-top-color: #3498db; }
+        .card-peserta.p2 { border-top-color: #e67e22; }
+        .card-peserta.p3 { border-top-color: #9b59b6; }
+        .card-peserta.p4 { border-top-color: #1abc9c; }
+        
+        .nama-peserta-title { font-size: 18px; font-weight: bold; margin-bottom: 15px; color: #2c3e50; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 5px; color: #444; }
+        .form-group label span { color: #3498db; font-weight: bold; font-size: 15px; }
+        
+        /* Style Slider / Bar Level */
+        input[type="range"] { width: 100%; margin: 5px 0; cursor: pointer; }
+        .paroki-input { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; font-size: 14px; font-weight: bold; margin-bottom: 15px; }
+        .paroki-input:focus { border-color: #3498db; outline: none; }
+        
+        /* Teori Grid Mini */
+        .teori-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #e9ecef; }
+        .teori-item { display: flex; flex-direction: column; }
+        .teori-item label { font-size: 11px; color: #666; margin-bottom: 2px; }
+        .teori-item input { padding: 5px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; text-align: center; }
+        
+        /* Hasil Skor Akhir */
+        .score-box { margin-top: 20px; padding: 12px; background: #e8f8f5; border-left: 4px solid #2cc391; border-radius: 4px; text-align: center; }
+        .score-box .total { font-size: 22px; font-weight: bold; color: #16a085; }
+        .score-box .info { font-size: 11px; color: #7f8c8d; margin-top: 4px; }
+    </style>
+</head>
+<body>
+
+<div class="header-panel">
+    <h1>KAPELAN JURI WIRUK</h1>
+    <div style="font-size: 13px; margin-top: 5px; opacity: 0.8;">Penilaian Real-Time Multi-Peserta per Kloter</div>
+</div>
+
+<div class="control-panel">
+    <label for="jumlah_peserta">Jumlah Peserta Kloter Ini:</label>
+    <select id="jumlah_peserta" onchange="aturJumlahPeserta()">
+        <option value="3">3 Peserta</option>
+        <option value="4" selected>4 Peserta</option>
+    </select>
+</div>
+
+<div class="grid-peserta">
+    <!-- Loop Generator Form untuk 4 Peserta -->
+    <script>
+        for (let i = 1; i <= 4; i++) {
+            document.write(`
+                <div id="card-${i}" class="card-peserta p${i}">
+                    <div>
+                        <div class="nama-peserta-title">PESERTA ${i}</div>
+                        <input type="text" id="paroki-${i}" class="paroki-input" placeholder="Masukkan Nama Paroki / No Urut">
+                        
+                        <!-- Kriteria 1: Bara -->
+                        <div class="form-group">
+                            <label>1. Nyala Bara & Pendupaan (30%) <span id="lbl-bara-${i}">5</span></label>
+                            <input type="range" id="bara-${i}" min="1" max="10" value="5" oninput="hitungSkor(${i})">
+                        </div>
+
+                        <!-- Kriteria 2: Waktu -->
+                        <div class="form-group">
+                            <label>2. Durasi Waktu <span id="lbl-waktu-${i}">7.5 Menit</span></label>
+                            <input type="range" id="waktu-${i}" min="5" max="12" step="0.1" value="7.5" oninput="hitungSkor(${i})">
+                        </div>
+
+                        <!-- Kriteria 3: Teori -->
+                        <div class="form-group">
+                            <label>3. Teori (Bobot 25%)</label>
+                            <div class="teori-grid">
+                                <div class="teori-item">
+                                    <label>Bowl Benar (x4)</label>
+                                    <input type="number" id="bowl-${i}" value="0" min="0" oninput="hitungSkor(${i})">
+                                </div>
+                                <div class="teori-item">
+                                    <label>Rebutan Benar (x2)</label>
+                                    <input type="number" id="rebutan-b-${i}" value="0" min="0" oninput="hitungSkor(${i})">
+                                </div>
+                                <div class="teori-item">
+                                    <label>Rebutan Salah (-1)</label>
+                                    <input type="number" id="rebutan-s-${i}" value="0" min="0" oninput="hitungSkor(${i})">
+                                </div>
+                                <div class="teori-item">
+                                    <label>Tanpa Izin (-1)</label>
+                                    <input type="number" id="izin-${i}" value="0" min="0" oninput="hitungSkor(${i})">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Kriteria 4: 5R -->
+                        <div class="form-group">
+                            <label>4. Manajemen 5R (10%) <span id="lbl-5r-${i}">5</span></label>
+                            <input type="range" id="5r-${i}" min="1" max="10" value="5" oninput="hitungSkor(${i})">
+                        </div>
+
+                        <!-- Kriteria 5: Sikap -->
+                        <div class="form-group">
+                            <label>5. Sikap / Gestur (10%) <span id="lbl-sikap-${i}">5</span></label>
+                            <input type="range" id="sikap-${i}" min="1" max="10" value="5" oninput="hitungSkor(${i})">
+                        </div>
+                    </div>
+
+                    <!-- Kotak Hasil Akhir -->
+                    <div class="score-box">
+                        <div style="font-size: 12px; font-weight: bold; color: #7f8c8d;">NILAI AKHIR</div>
+                        <div id="total-${i}" class="total">0.00</div>
+                        <div id="info-waktu-${i}" class="info">Poin Waktu: 0 | Poin Teori: 0</div>
+                    </div>
+                </div>
+            `);
+        }
+    </script>
+</div>
+
+<script>
+// Fungsi mengatur tampilan jumlah form peserta (3 atau 4)
+function aturJumlahPeserta() {
+    let jumlah = document.getElementById('jumlah_peserta').value;
+    if (jumlah == "3") {
+        document.getElementById('card-4').style.display = 'none';
+    } else {
+        document.getElementById('card-4').style.display = 'flex';
+    }
+}
+
+// Fungsi utama perhitungan skor per peserta
+function hitungSkor(id) {
+    // 1. Ambil semua Nilai dari Elemen
+    let bara = parseFloat(document.getElementById(`bara-${id}`).value);
+    let waktu = parseFloat(document.getElementById(`waktu-${id}`).value);
+    let bowl = parseInt(document.getElementById(`bowl-${id}`).value) || 0;
+    let reb_b = parseInt(document.getElementById(`rebutan-b-${id}`).value) || 0;
+    let reb_s = parseInt(document.getElementById(`rebutan-s-${id}`).value) || 0;
+    let izin = parseInt(document.getElementById(`izin-${id}`).value) || 0;
+    let m_5r = parseFloat(document.getElementById(`5r-${id}`).value);
+    let sikap = parseFloat(document.getElementById(`sikap-${id}`).value);
+
+    // 2. Update Label Teks Bar Level / Slider secara Real-Time
+    document.getElementById(`lbl-bara-${id}`).innerText = bara;
+    document.getElementById(`lbl-waktu-${id}`).innerText = waktu.toFixed(1) + " Menit";
+    document.getElementById(`lbl-5r-${id}`).innerText = m_5r;
+    document.getElementById(`lbl-sikap-${id}`).innerText = sikap;
+
+    // 3. Logika Poin Waktu (Dibawah 8 menit = 10, di atas/sama dengan 8 menit = 9)
+    let poin_waktu = (waktu < 8) ? 10 : 9;
+
+    // 4. Logika Poin Teori murni
+    let poin_teori = (bowl * 4) + (reb_b * 2) - (reb_s * 1) - (izin * 1);
+    if (poin_teori < 0) poin_teori = 0; // Kunci batas bawah 0 agar tidak minus
+
+    // 5. Kalkulasi Menggunakan Bobot Persentase
+    let n_bara = bara * 0.30;
+    let n_waktu = poin_waktu * 0.25;
+    let n_teori = poin_teori * 0.25;
+    let n_5r = m_5r * 0.10;
+    let n_sikap = sikap * 0.10;
+
+    let nilai_akhir = n_bara + n_waktu + n_teori + n_5r + n_sikap;
+
+    // 6. Cetak Hasil Akhir ke dalam Kotak Skor masing-masing peserta
+    document.getElementById(`total-${id}`).innerText = nilai_akhir.toFixed(2);
+    document.getElementById(`info-waktu-${id}`).innerText = `Poin Waktu: ${poin_waktu} | Poin Teori Murni: ${poin_teori}`;
+}
+
+// Inisialisasi hitungan awal saat aplikasi pertama kali dibuka
+for (let i = 1; i <= 4; i++) {
+    hitungSkor(i);
+}
+aturJumlahPeserta();
+</script>
+
+</body>
+</html>
