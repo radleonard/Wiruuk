@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aplikasi Penilaian Juri Wiruk</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f6f9; color: #333; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #2c3e50; }
+        .section { margin-bottom: 15px; padding: 10px; border-bottom: 1px solid #ddd; }
+        label { font-weight: bold; display: block; margin-bottom: 5px; }
+        input[type="number"] { width: 100%; padding: 8px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+        .hint { font-size: 12px; color: #666; margin-top: 2px; }
+        button { width: 100%; padding: 12px; background-color: #27ae60; color: white; border: none; border-radius: 4px; font-size: 16px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #219a52; }
+        .result-box { margin-top: 20px; padding: 15px; background-color: #e8f8f5; border-left: 5px solid #2cc391; border-radius: 4px; display: none; }
+        .result-title { font-size: 18px; font-weight: bold; color: #16a085; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Form Penilaian Lomba Wiruk</h2>
+    <hr>
+    
+    <!-- Kriteria 1 -->
+    <div class="section">
+        <label>1. Nyala Bara Api & Praktek Pendupaan (Bobot 30%)</label>
+        <input type="number" id="bara" min="1" max="10" placeholder="Masukkan nilai 1 - 10">
+        <div class="hint">8-10: Sangat mantap/SOP | 4-8: Cukup baik | 1-4: Tidak stabil/salah arah</div>
+    </div>
+
+    <!-- Kriteria 2 -->
+    <div class="section">
+        <label>2. Durasi Waktu Pengerjaan (Menit)</label>
+        <input type="number" id="waktu" step="0.1" placeholder="Contoh: 7.5 atau 9">
+        <div class="hint">< 8 menit = 10 Poin | >= 8 menit = 9 Poin</div>
+    </div>
+
+    <!-- Kriteria 3 -->
+    <div class="section">
+        <label>3. Teori (Bobot 25%)</label>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 5px;">
+            <div>
+                <label style="font-size:13px;">Jawaban Bowl Benar (x4):</label>
+                <input type="number" id="teori_bowl" value="0" min="0">
+            </div>
+            <div>
+                <label style="font-size:13px;">Rebutan Benar (x2):</label>
+                <input type="number" id="rebutan_benar" value="0" min="0">
+            </div>
+            <div>
+                <label style="font-size:13px;">Rebutan Salah (-1):</label>
+                <input type="number" id="rebutan_salah" value="0" min="0">
+            </div>
+            <div>
+                <label style="font-size:13px;">Menjawab Tanpa Izin (-1):</label>
+                <input type="number" id="tanpa_izin" value="0" min="0">
+            </div>
+        </div>
+    </div>
+
+    <!-- Kriteria 4 -->
+    <div class="section">
+        <label>4. Manajemen 5R (Bobot 10%)</label>
+        <input type="number" id="manajemen" min="1" max="10" placeholder="Masukkan nilai 1 - 10">
+        <div class="hint">8-10: Sangat bersih/rapi | 4-8: Cukup rapi | 1-4: Berantakan/arang tercecer</div>
+    </div>
+
+    <!-- Kriteria 5 -->
+    <div class="section">
+        <label>5. Sikap / Gestur (Bobot 10%)</label>
+        <input type="number" id="sikap" min="1" max="10" placeholder="Masukkan nilai 1 - 10">
+        <div class="hint">8-10: Profesional/tenang | 4-8: Cukup fokus/tegang | 1-4: Gugup/ragu</div>
+    </div>
+
+    <button onclick="hitungNilai()">Hitung Nilai Akhir</button>
+
+    <div id="hasil" class="result-box">
+        <div class="result-title">Hasil Penilaian:</div>
+        <p id="detail_skor"></p>
+        <h3 id="total_skor" style="margin: 5px 0 0 0; color: #2c3e50;"></h3>
+    </div>
+</div>
+
+<script>
+function hitungNilai() {
+    // Ambil nilai input
+    let bara = parseFloat(document.getElementById('bara').value) || 0;
+    let waktu = parseFloat(document.getElementById('waktu').value) || 0;
+    let bowl = parseInt(document.getElementById('teori_bowl').value) || 0;
+    let reb_benar = parseInt(document.getElementById('rebutan_benar').value) || 0;
+    let reb_salah = parseInt(document.getElementById('rebutan_salah').value) || 0;
+    let izin_salah = parseInt(document.getElementById('tanpa_izin').value) || 0;
+    let manajemen = parseFloat(document.getElementById('manajemen').value) || 0;
+    let sikap = parseFloat(document.getElementById('sikap').value) || 0;
+
+    // Logika Ketepatan Waktu
+    let skor_waktu = (waktu < 8) ? 10 : 9;
+
+    // Logika Teori
+    let skor_teori = (bowl * 4) + (reb_benar * 2) - (reb_salah * 1) - (izin_salah * 1);
+    if (skor_teori < 0) skor_teori = 0; // Mengunci agar skor teori tidak minus
+
+    // Kalkulasi Berbobot
+    let n_bara = bara * 0.30;
+    let n_waktu = skor_waktu * 0.25;
+    let n_teori = skor_teori * 0.25;
+    let n_manajemen = manajemen * 0.10;
+    let n_sikap = sikap * 0.10;
+
+    let nilai_akhir = n_bara + n_waktu + n_teori + n_manajemen + n_sikap;
+
+    // Tampilkan Hasil
+    document.getElementById('detail_skor').innerHTML = `
+        • Skor Waktu: ${skor_waktu} poin (Durasi: ${waktu} mnt)<br>
+        • Skor Teori Murni: ${skor_teori} poin<br>
+        <small style="color:#7f8c8d;">*Perhitungan Teori: (Bowl:${bowl}x4) + (Reb Benar:${reb_benar}x2) - (Reb Salah:${reb_salah}) - (Tanpa Izin:${izin_salah})</small>
+    `;
+    document.getElementById('total_skor').innerHTML = `NILAI AKHIR: ${nilai_akhir.toFixed(2)}`;
+    document.getElementById('hasil').style.display = 'block';
+}
+</script>
+
+</body>
+</html>
