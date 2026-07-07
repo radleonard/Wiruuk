@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KAPELAN JURI WIRUK - One Click Automation</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 20px; background-color: #f3f5f7; color: #333; }
+        .container { max-width: 1200px; margin: auto; }
+        
+        /* Header & Setup */
+        .header-box { text-align: center; background: #2c3e50; color: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .setup-box { background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+        
+        /* Baris Pengaturan Atas */
+        .top-settings { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .input-juri-box, .select-paroki-box { display: flex; align-items: center; gap: 10px; }
+        .setup-box label { font-weight: bold; font-size: 15px; color: #2c3e50; }
+        .setup-box input[type="text"].juri-input { padding: 8px 12px; font-weight: bold; border: 1px solid #ccc; border-radius: 4px; font-size: 14px; width: 200px; background-color: #fff9e6; }
+        .setup-box select { padding: 8px 12px; font-weight: bold; border: 1px solid #ccc; border-radius: 4px; }
+
+        .paroki-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; border-top: 2px dashed #eee; padding-top: 15px; }
+        .paroki-inputs input { padding: 10px; border: 1px solid #ccc; border-radius: 4px; font-weight: bold; }
+        
+        /* Navigasi Babak (Tabs) */
+        .tab-navigation { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 3px solid #ccc; padding-bottom: 10px; }
+        .tab-btn { padding: 12px 20px; background: #dbdbdb; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; font-size: 15px; transition: 0.3s; flex: 1; }
+        .tab-btn.active { background: #2980b9; color: white; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        
+        /* Grid Penilaian per Babak */
+        .grid-penilaian { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+        .card-babak { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); border-top: 4px solid #2980b9; }
+        .card-header { font-size: 16px; font-weight: bold; color: #2c3e50; margin-bottom: 15px; padding-bottom: 5px; border-bottom: 2px solid #f1f1f1; }
+        
+        /* Form & Sliders */
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: flex; justify-content: space-between; font-weight: 600; font-size: 14px; margin-bottom: 5px; }
+        .form-group label span { color: #2980b9; font-weight: bold; }
+        input[type="range"] { width: 100%; cursor: pointer; }
+        
+        /* Sesi Tanya Jawab Super Ringkas */
+        .teori-input-box { display: flex; flex-direction: column; gap: 8px; background: #f8f9fa; padding: 10px; border-radius: 6px; border: 1px solid #e9ecef; }
+        .teori-item { display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 600; color: #444; }
+        .teori-item label { margin: 0; }
+        .teori-item input { width: 55px; padding: 5px; text-align: center; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; font-weight: bold; color: #2c3e50; }
+
+        /* Submit Section */
+        .submit-container { text-align: center; margin: 40px 0; }
+        .btn-submit { padding: 18px 50px; background: #27ae60; color: white; border: none; border-radius: 35px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 10px rgba(39, 174, 96, 0.3); transition: 0.2s; }
+        .btn-submit:hover { background: #219a52; transform: translateY(-2px); }
+        
+        /* Hasil Akhir */
+        .hasil-box { background: white; padding: 25px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.12); display: none; margin-top: 20px; border-left: 8px solid #27ae60; }
+        .table-container-capture { background: white; padding: 20px; border-radius: 6px; } 
+        .table-hasil { width: 100%; border-collapse: collapse; margin-top: 15px; }
+        .table-hasil th, .table-hasil td { border: 1px solid #ddd; padding: 12px; text-align: center; }
+        .table-hasil th { background-color: #f2f2f2; font-weight: bold; }
+        .rank-1 { background-color: #d4edda; font-weight: bold; }
+        .info-rekap-text { font-size: 14px; color: #444; margin: 5px 0 15px 0; line-height: 1.6; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header-box">
+        <h2>REKAPITULASI JURI WIRUK PER KLOTER</h2>
+        <p style="margin: 5px 0 0 0; opacity: 0.8;">Skala Penilaian 1 - 100 | Sistem Otomasi 3-in-1 Sekali Klik</p>
+    </div>
+
+    <div class="setup-box">
+        <div class="top-settings">
+            <div class="input-juri-box">
+                <label for="nama_juri">Nama Juri:</label>
+                <input type="text" id="nama_juri" class="juri-input" value="Juri Utama Wiruk" placeholder="Masukkan Nama Anda">
+            </div>
+            <div class="select-paroki-box">
+                <label for="opt_jumlah">Jumlah Peserta:</label>
+                <select id="opt_jumlah" onchange="sinkronJumlahPeserta()">
+                    <option value="3">3 Paroki</option>
+                    <option value="4" selected>4 Paroki</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="paroki-inputs">
+            <input type="text" id="nama_p1" value="Paroki A" placeholder="Nama Paroki 1" oninput="updateNamaDisplay()">
+            <input type="text" id="nama_p2" value="Paroki B" placeholder="Nama Paroki 2" oninput="updateNamaDisplay()">
+            <input type="text" id="nama_p3" value="Paroki C" placeholder="Nama Paroki 3" oninput="updateNamaDisplay()">
+            <input type="text" id="nama_p4" value="Paroki D" placeholder="Nama Paroki 4" oninput="updateNamaDisplay()">
+        </div>
+    </div>
+
+    <div class="tab-navigation">
+        <button class="tab-btn active" onclick="bukaBabak(this, 'babak1')">BABAK I: Tanya Jawab</button>
+        <button class="tab-btn" onclick="bukaBabak(this, 'babak2')">BABAK II: Pembakaran Bara</button>
+        <button class="tab-btn" onclick="bukaBabak(this, 'babak3')">BABAK III: Praktek Pendupaan</button>
+    </div>
+
+    <div id="babak1" class="tab-content active">
+        <div class="grid-penilaian">
+            <script>
+                for(let i=1; i<=4; i++) {
+                    document.write(`
+                        <div class="card-babak p-card-${i}">
+                            <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                            <div class="teori-input-box">
+                                <div class="teori-item"><label>Bowl Benar (+40)</label><input type="number" id="bowl_${i}" value="0" min="0"></div>
+                                <div class="teori-item"><label>Rebutan Benar (+20)</label><input type="number" id="rebutan_b_${i}" value="0" min="0"></div>
+                                <div class="teori-item"><label>Rebutan Salah (-10)</label><input type="number" id="rebutan_s_${i}" value="0" min="0"></div>
+                                <div class="teori-item"><label>Tanpa Izin (-10)</label><input type="number" id="izin_${i}" value="0" min="0"></div>
+                            </div>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+    </div>
+
+    <div id="babak2" class="tab-content">
+        <div class="grid-penilaian">
+            <script>
+                for(let i=1; i<=4; i++) {
+                    document.write(`
+                        <div class="card-babak p-card-${i}">
+                            <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                            <div class="form-group">
+                                <label>Kesiapan & Nyala Bara (15%) <span id="val_bara_${i}">50</span></label>
+                                <input type="range" id="bara_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_bara_${i}').innerText=this.value">
+                            </div>
+                            <div class="form-group">
+                                <label>Durasi Pengerjaan <span id="val_waktu_txt_${i}">07:30</span></label>
+                                <input type="range" id="waktu_${i}" min="240" max="720" step="1" value="450" oninput="updateWaktuLabel(${i}, this.value)">
+                            </div>
+                            <div class="form-group">
+                                <label>Manajemen 5R (10%) <span id="val_5r_${i}">50</span></label>
+                                <input type="range" id="5r_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_5r_${i}').innerText=this.value">
+                            </div>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+    </div>
+
+    <div id="babak3" class="tab-content">
+        <div class="grid-penilaian">
+            <script>
+                for(let i=1; i<=4; i++) {
+                    document.write(`
+                        <div class="card-babak p-card-${i}">
+                            <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                            <div class="form-group">
+                                <label>Teknik & Ayunan Wiruk (15%) <span id="val_dupa_${i}">50</span></label>
+                                <input type="range" id="dupa_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_dupa_${i}').innerText=this.value">
+                            </div>
+                            <div class="form-group">
+                                <label>Sikap / Gestur Tubuh (10%) <span id="val_sikap_${i}">50</span></label>
+                                <input type="range" id="sikap_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_sikap_${i}').innerText=this.value">
+                            </div>
+                        </div>
+                    `);
+                }
+            </script>
+        </div>
+    </div>
+
+    <div class="submit-container">
+        <button class="btn-submit" onclick="prosesSubmitOtomatis()">KUNCI & SUBMIT HASIL AKHIR</button>
+    </div>
+
+    <div id="kotak_hasil" class="hasil-box">
+        <div id="area_foto" class="table-container-capture">
+            <h3 style="margin: 0; color: #2c3e50;">🏆 Hasil Penilaian Akhir Lomba Wiruk</h3>
+            <div id="info_rekap" class="info-rekap-text"></div>
+            
+            <table class="table-hasil">
+                <thead>
+                    <tr>
+                        <th>Peringkat</th>
+                        <th>Nama Paroki / Peserta</th>
+                        <th>Teori (25%)</th>
+                        <th>Bara Api (15%)</th>
+                        <th>Waktu (25%)</th>
+                        <th>5R (10%)</th>
+                        <th>Pendupaan (15%)</th>
+                        <th>Sikap (10%)</th>
+                        <th>Total Skor</th>
+                    </tr>
+                </thead>
+                <tbody id="body_tabel_hasil"></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+let globalHasilData = []; 
+
+// REVISI BUG TAB: Menggunakan classList API dan pencarian elemen yang presisi
+function bukaBabak(btnElemen, babakId) {
+    // Sembunyikan semua konten babak
+    let tabcontent = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].classList.remove("active");
+    }
+    
+    // Hapus status aktif dari semua tombol tab
+    let tablinks = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tablinks.length; i++) {
+        tablinks[i].classList.remove("active");
+    }
+    
+    // Aktifkan konten babak & tombol yang sedang di-klik
+    document.getElementById(babakId).classList.add("active");
+    btnElemen.classList.add("active");
+}
+
+function updateNamaDisplay() {
+    for(let i=1; i<=4; i++) {
+        let nama = document.getElementById(`nama_p${i}`).value || `Paroki ${i}`;
+        let elemenTeks = document.getElementsByClassName(`txt-nama-${i}`);
+        for(let j=0; j<elemenTeks.length; j++) elemenTeks[j].innerText = nama;
+    }
+}
+
+function updateWaktuLabel(id, totalDetik) {
+    let m = Math.floor(totalDetik / 60);
+    let s = totalDetik % 60;
+    document.getElementById(`val_waktu_txt_${id}`).innerText = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s + " Menit";
+}
+
+function sinkronJumlahPeserta() {
+    let jml = document.getElementById("opt_jumlah").value;
+    let kartuKe4 = document.getElementsByClassName("p-card-4");
+    for(let i=0; i<kartuKe4.length; i++) kartuKe4[i].style.display = (jml == "3") ? "none" : "block";
+}
+
+function prosesSubmitOtomatis() {
+    let jumlahPeserta = parseInt(document.getElementById("opt_jumlah").value);
+    let juriName = document.getElementById("nama_juri").value || "Juri Tanpa Nama";
+    let waktuSekarang = new Date().toLocaleString('id-ID');
+    globalHasilData = [];
+
+    // --- AKSI 1: MEMBUAT DAN MENAMPILKAN TABEL REKAP ---
+    for(let i = 1; i <= jumlahPeserta; i++) {
+        let nama = document.getElementById(`nama_p${i}`).value || `Paroki ${i}`;
+        
+        let bowl = parseInt(document.getElementById(`bowl_${i}`).value) || 0;
+        let reb_b = parseInt(document.getElementById(`rebutan_b_${i}`).value) || 0;
+        let reb_s = parseInt(document.getElementById(`rebutan_s_${i}`).value) || 0;
+        let izin = parseInt(document.getElementById(`izin_${i}`).value) || 0;
+        let skorTeori = (bowl * 40) + (reb_b * 20) - (reb_s * 10) - (izin * 10);
+        if (skorTeori < 0) skorTeori = 0;
+
+        let skorBara = parseFloat(document.getElementById(`bara_${i}`).value);
+        let totalDetikWaktu = parseInt(document.getElementById(`waktu_${i}`).value);
+        let skor5R = parseFloat(document.getElementById(`5r_${i}`).value);
+        let skorWaktu = (totalDetikWaktu < 480) ? 100 : 90;
+
+        let skorDupa = parseFloat(document.getElementById(`dupa_${i}`).value);
+        let skorSikap = parseFloat(document.getElementById(`sikap_${i}`).value);
+
+        let totalNilai = (skorTeori * 0.25) + (skorBara * 0.15) + (skorWaktu * 0.25) + (skor5R * 0.10) + (skorDupa * 0.15) + (skorSikap * 0.10);
+
+        let m = Math.floor(totalDetikWaktu / 60);
+        let s = totalDetikWaktu % 60;
+        let stringWaktu = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+
+        globalHasilData.push({
+            nama: nama, teori: skorTeori, bara: skorBara, waktu: skorWaktu, mmss: stringWaktu, m5r: skor5R, dupa: skorDupa, sikap: skorSikap, total: totalNilai
+        });
+    }
+
+    globalHasilData.sort((a, b) => b.total - a.total);
+
+    let htmlTabel = "";
+    globalHasilData.forEach((data, index) => {
+        let kelasRank = (index === 0) ? "class='rank-1'" : "";
+        htmlTabel += `
+            <tr ${kelasRank}>
+                <td>${index + 1}</td>
+                <td style="text-align: left; font-weight: bold;">${data.nama}</td>
+                <td>${data.teori}</td>
+                <td>${data.bara}</td>
+                <td>${data.waktu} (${data.mmss})</td>
+                <td>${data.m5r}</td>
+                <td>${data.dupa}</td>
+                <td>${data.sikap}</td>
+                <td style="font-size: 16px; font-weight: bold; color: #2c3e50;">${data.total.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("body_tabel_hasil").innerHTML = htmlTabel;
+    document.getElementById("info_rekap").innerHTML = `👤 <b>Nama Juri:</b> ${juriName} <br> ⏱️ <b>Waktu Pembuatan Rekap (Timestamp):</b> ${waktuSekarang}`;
+    
+    let kotakHasil = document.getElementById("kotak_hasil");
+    kotakHasil.style.display = "block";
+    kotakHasil.scrollIntoView({ behavior: 'smooth' });
+
+    setTimeout(() => {
+        autoUnduhJpgDanKirimWA(juriName, waktuSekarang);
+    }, 500);
+}
+
+function autoUnduhJpgDanKirimWA(juriName, timestamp) {
+    let targetArea = document.getElementById("area_foto");
+    
+    // --- AKSI 2: OTOMATIS CONVERT KE JPG & DOWNLOAD ---
+    html2canvas(targetArea, { scale: 2 }).then(canvas => {
+        let gambarJpg = canvas.toDataURL("image/jpeg", 0.9);
+        let linkUnduh = document.createElement("a");
+        let cleanJuriName = juriName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+        linkUnduh.download = `Rekap_Wiruk_${cleanJuriName}_${new Date().getTime()}.jpg`;
+        linkUnduh.href = gambarJpg;
+        linkUnduh.click();
+
+        // --- AKSI 3: OTOMATIS REDIRECT KE WA ---
+        let nomorWA = "6287780386016"; 
+        
+        let pesan = `🏆 *REKAP HASIL PENILAIAN LOMBA WIRUK* 🏆\n`;
+        pesan += `👤 *Nama Juri:* ${juriName}\n`;
+        pesan += `⏱️ *Timestamp:* ${timestamp}\n`;
+        pesan += `==================================\n\n`;
+        
+        globalHasilData.forEach((data, index) => {
+            let medali = (index === 0) ? "🥇 " : (index === 1) ? "🥈 " : (index === 2) ? "🥉 " : "• ";
+            pesan += `${medali}*PERINGKAT ${index + 1}: ${data.nama.toUpperCase()}*\n`;
+            pesan += `   - Skor Teori (25%): ${data.teori}\n`;
+            pesan += `   - Skor Bara Api (15%): ${data.bara}\n`;
+            pesan += `   - Durasi Pengerjaan: ${data.mmss} (Skor: ${data.waktu})\n`;
+            pesan += `   - Manajemen 5R (10%): ${data.m5r}\n`;
+            pesan += `   - Pendupaan (15%): ${data.dupa}\n`;
+            pesan += `   - Sikap/Gestur (10%): ${data.sikap}\n`;
+            pesan += `   👉 *TOTAL SKOR AKHIR: ${data.total.toFixed(2)}*\n`;
+            pesan += `----------------------------------\n`;
+        });
+        
+        pesan += `\n_Catatan: File rekap utuh berformat JPG sudah otomatis terunduh di galeri/folder download Anda. Mohon lampirkan file gambar tersebut pada chat ini._`;
+
+        let urlWA = `https://wa.me/${nomorWA}?text=${encodeURIComponent(pesan)}`;
+        window.open(urlWA, '_blank');
+    });
+}
+
+updateNamaDisplay();
+sinkronJumlahPeserta();
+</script>
+
+</body>
+</html>
