@@ -151,7 +151,7 @@
             cursor: pointer; 
         }
 
-        .teori-input-box { display: flex; flex-direction: column; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+        .teori-input-box { display: flex; flex-direction: column; gap: 8px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0; margin-top: 10px; }
         .teori-item { display: flex; justify-content: space-between; align-items: center; font-size: 12px; font-weight: 600; }
         .teori-item input { width: 50px; padding: 5px; text-align: center; border: 1px solid #cbd5e1; border-radius: 4px; font-weight: bold; }
 
@@ -179,7 +179,7 @@
         .table-hasil th { background-color: #f1f5f9; font-weight: 700; color: var(--primary-navy); }
         .rank-1 { background-color: #e6fffa; font-weight: bold; }
 
-        /* Action Buttons & Fallback Image */
+        /* Action Buttons */
         .action-rekap-box {
             display: flex;
             gap: 10px;
@@ -273,7 +273,7 @@
         </div>
 
         <div class="tab-navigation">
-            <button class="tab-btn active" onclick="bukaBabak(this, 'babak1')">BABAK I: Tanya Jawab</button>
+            <button class="tab-btn active" onclick="bukaBabak(this, 'babak1')">BABAK I: Tanya Jawab & Rebutan</button>
             <button class="tab-btn" onclick="bukaBabak(this, 'babak2')">BABAK II: Pembakaran Bara</button>
             <button class="tab-btn" onclick="bukaBabak(this, 'babak3')">BABAK III: Praktek Pendupaan</button>
         </div>
@@ -286,11 +286,19 @@
                         document.write(`
                             <div class="card-babak card-p-${i}">
                                 <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                                <div class="form-group">
+                                    <label>Soal Bowl / Experience <span id="val_bowl_${i}">50</span></label>
+                                    <input type="range" id="bowl_${i}" min="0" max="100" value="50" oninput="document.getElementById('val_bowl_${i}').innerText=this.value">
+                                </div>
                                 <div class="teori-input-box">
-                                    <div class="teori-item"><label>Bowl Benar (+40)</label><input type="number" id="bowl_${i}" value="0" min="0"></div>
-                                    <div class="teori-item"><label>Rebutan Benar (+20)</label><input type="number" id="rebutan_b_${i}" value="0" min="0"></div>
-                                    <div class="teori-item"><label>Rebutan Salah (-10)</label><input type="number" id="rebutan_s_${i}" value="0" min="0"></div>
-                                    <div class="teori-item"><label>Tanpa Izin (-10)</label><input type="number" id="izin_${i}" value="0" min="0"></div>
+                                    <div class="teori-item">
+                                        <label>Rebutan Benar (+20/soal)</label>
+                                        <input type="number" id="rebutan_b_${i}" value="0" min="0">
+                                    </div>
+                                    <div class="teori-item">
+                                        <label style="color: var(--accent-pink);">Pelanggaran / Salah (-10/x)</label>
+                                        <input type="number" id="pelanggaran_${i}" value="0" min="0">
+                                    </div>
                                 </div>
                             </div>
                         `);
@@ -387,7 +395,7 @@
 
             <!-- Tombol Aksi Tambahan -->
             <div class="action-rekap-box">
-                <button class="btn-action-download" onclick="unduhGambarRekapManual()">💾 Unduh Ulang Gambar Rekap</button>
+                <button class="btn-action-download" onclick="unduhGambarRekapManual()">💾 Unduh Gambar Rekap</button>
                 <button class="btn-action-wa" onclick="kirimPesanWAManual()">📲 Kirim Ke WhatsApp Admin</button>
             </div>
         </div>
@@ -464,11 +472,11 @@ function prosesSubmitOtomatis() {
     for(let i = 1; i <= jumlahPeserta; i++) {
         let nama = document.getElementById(`input_p${i}`).value || `Paroki ${i}`;
         
-        let bowl = parseInt(document.getElementById(`bowl_${i}`).value) || 0;
+        // Kalkulasi Babak I Baru
+        let skorBowl = parseFloat(document.getElementById(`bowl_${i}`).value) || 0;
         let reb_b = parseInt(document.getElementById(`rebutan_b_${i}`).value) || 0;
-        let reb_s = parseInt(document.getElementById(`rebutan_s_${i}`).value) || 0;
-        let izin = parseInt(document.getElementById(`izin_${i}`).value) || 0;
-        let skorTeori = Math.max(0, (bowl * 40) + (reb_b * 20) - (reb_s * 10) - (izin * 10));
+        let penalti = parseInt(document.getElementById(`pelanggaran_${i}`).value) || 0;
+        let skorTeori = Math.max(0, skorBowl + (reb_b * 20) - (penalti * 10));
 
         let skorBara = parseFloat(document.getElementById(`bara_${i}`).value);
         let totalDetikWaktu = parseInt(document.getElementById(`waktu_${i}`).value);
@@ -498,7 +506,7 @@ function prosesSubmitOtomatis() {
             <tr ${kelasRank}>
                 <td>${index + 1}</td>
                 <td style="text-align: left; font-weight: bold;">${data.nama}</td>
-                <td>${data.teori}</td>
+                <td>${data.teori.toFixed(1)}</td>
                 <td>${data.bara}</td>
                 <td>${data.waktu} (${data.mmss})</td>
                 <td>${data.m5r}</td>
@@ -540,14 +548,13 @@ function prosesSubmitOtomatis() {
 function autoGenerateImageAndRedirectWA(nomorWA) {
     let targetArea = document.getElementById("area_foto");
 
-    // Pre-open tab WhatsApp
     let waWindow = window.open("", "_blank");
     let urlWA = `https://wa.me/${nomorWA}?text=${encodeURIComponent(globalPesanWA)}`;
 
     html2canvas(targetArea, { 
         scale: 2,
         useCORS: true,
-        allowTaint: false, // Diset false agar tidak mengunci fungsi export blob
+        allowTaint: false,
         logging: false,
         imageTimeout: 1500
     }).then(canvas => {
@@ -555,7 +562,6 @@ function autoGenerateImageAndRedirectWA(nomorWA) {
             if (blob) {
                 globalBlobURL = URL.createObjectURL(blob);
                 
-                // Triger unduh otomatis via Blob URL
                 let linkUnduh = document.createElement("a");
                 let cleanJuriName = globalNamaJuri.replace(/[^a-z0-9]/gi, '_').toLowerCase();
                 linkUnduh.download = `Rekap_Wiruk_${cleanJuriName}_${Date.now()}.jpg`;
@@ -565,7 +571,6 @@ function autoGenerateImageAndRedirectWA(nomorWA) {
                 document.body.removeChild(linkUnduh);
             }
 
-            // Redirect ke WhatsApp
             if (waWindow && !waWindow.closed) {
                 waWindow.location.href = urlWA;
             } else {
