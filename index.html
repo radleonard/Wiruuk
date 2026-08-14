@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="icon" type="image/png" href="logo.png">
+    <title>SCORESHEET WIRUK - TAPA 2026</title>
+    <!-- Library html2canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        :root {
+            --bg-color: #f0f4f8;
+            --primary-navy: #1e293b;
+            --accent-teal: #00a896;
+            --accent-blue: #028090;
+            --accent-orange: #f77f00;
+            --accent-yellow: #ffb703;
+            --accent-pink: #e63946;
+            --accent-green: #2ba84a;
+            --text-dark: #334155;
+            --card-bg: #ffffff;
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            margin: 0; 
+            padding: 20px; 
+            background-color: var(--bg-color); 
+            color: var(--text-dark); 
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container { 
+            max-width: 1100px; 
+            margin: 0 auto; 
+            flex: 1; 
+            width: 100%; 
+            box-sizing: border-box; 
+        }
+
+        /* Setup Screen */
+        .setup-wrapper {
+            max-width: 550px;
+            margin: 30px auto 15px auto;
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            border-top: 6px solid var(--accent-teal);
+        }
+
+        .setup-header { text-align: center; margin-bottom: 25px; }
+        .setup-header img { max-height: 85px; margin-bottom: 12px; }
+        .setup-header h2 { margin: 0; color: var(--primary-navy); font-size: 22px; font-weight: 700; }
+        .setup-header p { margin: 5px 0 0 0; color: #64748b; font-size: 13px; }
+
+        .form-group-setup { margin-bottom: 18px; }
+        .form-group-setup label { display: block; font-weight: 600; font-size: 14px; margin-bottom: 6px; color: var(--primary-navy); }
+        .form-group-setup input, .form-group-setup select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 14px;
+            box-sizing: border-box;
+            transition: 0.3s;
+        }
+        .form-group-setup input:focus, .form-group-setup select:focus {
+            border-color: var(--accent-teal);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 168, 150, 0.15);
+        }
+
+        .paroki-list-setup {
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+            margin-bottom: 20px;
+        }
+        .paroki-list-setup label { font-weight: 700; font-size: 14px; color: var(--primary-navy); display: block; margin-bottom: 10px; }
+        .input-paroki-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .input-paroki-item span { font-weight: bold; width: 20px; color: var(--accent-orange); }
+        .input-paroki-item input { margin-bottom: 0; }
+
+        .btn-start {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, var(--accent-teal), var(--accent-blue));
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 168, 150, 0.3);
+            transition: 0.3s;
+        }
+        .btn-start:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(0, 168, 150, 0.4); }
+
+        /* Setup Simple Copyright */
+        .setup-copyright {
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+            margin-top: 15px;
+        }
+        .setup-copyright span { color: var(--accent-pink); }
+        .setup-copyright strong { color: var(--primary-navy); }
+
+        /* Scoresheet Screen */
+        .scoresheet-wrapper { display: none; }
+
+        .header-box { 
+            /* background: linear-gradient(135deg, var(--primary-navy), #0f172a); */
+            background: linear-gradient(300deg, #ed7600, #018651, #fbfd50, #25b5e9 );
+            background-size: 180% 180%;
+            animation: gradient-animation 18s ease infinite;
+            color: white; 
+            padding: 20px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        .header-left { display: flex; align-items: center; gap: 15px; }
+        .header-logo { max-height: 65px; background: white; padding: 4px; border-radius: 8px; }
+        .juri-badge { background: rgba(255,255,255,0.15); padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--bg-color); display: inline-block; margin-top: 4px; }
+        .btn-edit-setup { background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+        .btn-edit-setup:hover { background: rgba(255,255,255,0.3); }
+
+        /* Navigasi Babak */
+        .tab-navigation { display: flex; gap: 8px; margin-bottom: 20px; }
+        .tab-btn { 
+            padding: 12px 16px; 
+            background: #e2e8f0; 
+            border: none; 
+            border-radius: 8px; 
+            font-weight: 700; 
+            color: #64748b; 
+            cursor: pointer; 
+            font-size: 14px; 
+            flex: 1; 
+            transition: 0.3s;
+        }
+        .tab-btn.active { 
+            background: var(--accent-teal); 
+            color: white; 
+            box-shadow: 0 4px 10px rgba(0, 168, 150, 0.25);
+        }
+
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+
+        /* Cards Penilaian */
+        .grid-penilaian { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+        .card-babak { background: white; padding: 18px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); border-top: 4px solid var(--accent-blue); }
+        .card-header { font-size: 15px; font-weight: 700; color: var(--primary-navy); margin-bottom: 12px; padding-bottom: 8px; border-bottom: 2px solid #f1f5f9; }
+        
+        /* Babak 1 Custom Card Sections */
+        .card-section-top { margin-bottom: 12px; }
+        .card-section-bottom { background: #f8fafc; padding: 12px; border-radius: 8px; border: 1px solid #e2e8f0; }
+        .section-subtitle { font-size: 11px; font-weight: 700; text-transform: uppercase; color: #64748b; margin-bottom: 8px; letter-spacing: 0.5px; }
+        .section-divider { border: 0; height: 1px; background: #e2e8f0; margin: 12px 0; }
+
+        /* Rebutan UI Controls */
+        .btn-rebutan-benar {
+            width: 100%;
+            padding: 10px;
+            background: #ffffff;
+            border: 2px solid #cbd5e1;
+            color: #64748b;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+        .btn-rebutan-benar.active {
+            background: var(--accent-green);
+            border-color: var(--accent-green);
+            color: white;
+            box-shadow: 0 3px 8px rgba(43, 168, 74, 0.3);
+        }
+
+        .pelanggaran-box {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--accent-pink);
+        }
+        .counter-group { display: flex; align-items: center; gap: 6px; }
+        .btn-counter {
+            width: 26px;
+            height: 26px;
+            border-radius: 5px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            color: var(--primary-navy);
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+        }
+        .btn-counter:active { transform: scale(0.9); }
+        .counter-value { font-size: 13px; font-weight: 800; min-width: 18px; text-align: center; color: var(--primary-navy); }
+
+        .form-group { margin-bottom: 12px; }
+        .form-group label { display: flex; justify-content: space-between; font-weight: 600; font-size: 13px; margin-bottom: 6px; }
+        .form-group label span { color: var(--accent-teal); font-weight: bold; }
+        
+        input[type="range"] { 
+            width: 100%; 
+            accent-color: var(--accent-teal); 
+            cursor: pointer; 
+        }
+
+        /* Submit Button */
+        .submit-container { text-align: center; margin: 30px 0; }
+        .btn-submit { 
+            padding: 16px 40px; 
+            background: linear-gradient(135deg, var(--accent-pink), #c0392b); 
+            color: white; 
+            border: none; 
+            border-radius: 30px; 
+            font-size: 16px; 
+            font-weight: 700; 
+            cursor: pointer; 
+            box-shadow: 0 4px 15px rgba(230, 57, 70, 0.35); 
+            transition: 0.3s; 
+        }
+        .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(230, 57, 70, 0.45); }
+
+        /* Hasil Rekapitulasi Table */
+        .hasil-box { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); display: none; margin-top: 20px; border-left: 6px solid var(--accent-teal); }
+        .table-container-capture { background: white; padding: 15px; border-radius: 8px; }
+        .table-hasil { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 13px; }
+        .table-hasil th, .table-hasil td { border: 1px solid #cbd5e1; padding: 10px; text-align: center; }
+        .table-hasil th { background-color: #f1f5f9; font-weight: 700; color: var(--primary-navy); }
+        .rank-1 { background-color: #e6fffa; font-weight: bold; }
+
+        /* Action Buttons */
+        .action-rekap-box {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        .btn-action-download {
+            background: var(--accent-blue);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .btn-action-wa {
+            background: #25D366;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        /* Full Footer Style (Khusus Layar Scoresheet) */
+        .main-footer {
+            margin-top: 35px;
+            /* background: var(--primary-navy);*/
+            background: linear-gradient(300deg,#ed7600, #25b5e9,  #018651, #fbfd50 );
+            background-size: 180% 180%;
+            animation: gradient-animation 18s ease infinite;
+            color: #ffffff;
+            padding: 16px 22px;
+            border-radius: 12px;
+            font-size: 13px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+            box-sizing: border-box;
+        }
+        .footer-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .footer-links { 
+            display: flex; 
+            gap: 16px; 
+            align-items: center; 
+        }
+        .footer-icon-link {
+            color: #cbd5e1;
+            font-size: 20px;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.08);
+        }
+        .footer-icon-link:hover {
+            color: var(--accent-yellow);
+            background: rgba(255, 255, 255, 0.18);
+            transform: translateY(-2px);
+        }
+        .footer-credit { 
+            color: #cbd5e1; 
+            font-weight: 500; 
+            font-size: 12px;
+        }
+        .footer-credit span { color: var(--accent-pink); }
+        .footer-credit strong { color: #ffffff; }
+
+        @media (max-width: 600px) {
+            .footer-container { 
+                flex-direction: column; 
+                text-align: center; 
+                justify-content: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <!-- SETUP SCREEN -->
+    <div id="screen-setup">
+        <div class="setup-wrapper">
+            <div class="setup-header">
+                <img src="logo.png" alt="Logo TAPA 2026" onerror="this.style.display='none'">
+                <h2>SCORESHEET LOMBA WIRUK</h2>
+                <p>TAPA 2026 - Silakan Masukkan Data Juri & Peserta</p>
+            </div>
+
+            <form id="form-setup" onsubmit="simpanDataDanMulai(event)">
+                <div class="form-group-setup">
+                    <label for="input_nama_juri">👤 Nama Lengkap Juri:</label>
+                    <input type="text" id="input_nama_juri" placeholder="Contoh: Bpk. Yohanes" required>
+                </div>
+
+                <div class="form-group-setup">
+                    <label for="input_jumlah_paroki">👥 Jumlah Paroki yang Tampil:</label>
+                    <select id="input_jumlah_paroki" onchange="toggleInputParoki()">
+                        <option value="3">3 Paroki</option>
+                        <option value="4" selected>4 Paroki</option>
+                    </select>
+                </div>
+
+                <div class="paroki-list-setup">
+                    <label>🏛️ Urutan Tampil Paroki / Peserta:</label>
+                    <div class="input-paroki-item">
+                        <span>1.</span>
+                        <input type="text" id="input_p1" value="Paroki A" placeholder="Nama Paroki 1" required>
+                    </div>
+                    <div class="input-paroki-item">
+                        <span>2.</span>
+                        <input type="text" id="input_p2" value="Paroki B" placeholder="Nama Paroki 2" required>
+                    </div>
+                    <div class="input-paroki-item">
+                        <span>3.</span>
+                        <input type="text" id="input_p3" value="Paroki C" placeholder="Nama Paroki 3" required>
+                    </div>
+                    <div class="input-paroki-item" id="box_input_p4">
+                        <span>4.</span>
+                        <input type="text" id="input_p4" value="Paroki D" placeholder="Nama Paroki 4" required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-start">MASUK KE SCORESHEET ➔</button>
+            </form>
+        </div>
+
+        <!-- Copyright Sederhana Khusus Layar Setup -->
+        <div class="setup-copyright">
+            © 2026 TAPA - <strong>Leonard Raditya</strong>
+        </div>
+    </div>
+
+    <!-- SCORESHEET SCREEN -->
+    <div id="screen-scoresheet" class="scoresheet-wrapper">
+        <div class="header-box">
+            <div class="header-left">
+                <img src="logo.png" alt="Logo TAPA 2026" class="header-logo" onerror="this.style.display='none'">
+                <div>
+                    <h3 style="margin: 0; font-size: 18px; color: #ffffff;">SCORESHEET PENILAIAN WIRUK</h3>
+                    <div class="juri-badge">👤 Juri: <span id="display_juri_name">-</span></div>
+                </div>
+            </div>
+            <button class="btn-edit-setup" onclick="kembaliKeSetup()">⚙️ Edit Data</button>
+        </div>
+
+        <div class="tab-navigation">
+            <button class="tab-btn active" onclick="bukaBabak(this, 'babak1')">BABAK I: Tanya Jawab & Rebutan</button>
+            <button class="tab-btn" onclick="bukaBabak(this, 'babak2')">BABAK II: Pembakaran Bara</button>
+            <button class="tab-btn" onclick="bukaBabak(this, 'babak3')">BABAK III: Praktek Pendupaan</button>
+        </div>
+
+        <!-- BABAK I -->
+        <div id="babak1" class="tab-content active">
+            <div class="grid-penilaian">
+                <script>
+                    for(let i=1; i<=4; i++) {
+                        document.write(`
+                            <div class="card-babak card-p-${i}">
+                                <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                                
+                                <!-- Bagian Atas: Bowl Experience -->
+                                <div class="card-section-top">
+                                    <div class="section-subtitle">🥣 Bagian 1: Soal Bowl / Experience</div>
+                                    <div class="form-group">
+                                        <label>Tingkat Penilaian <span id="val_bowl_${i}">50</span></label>
+                                        <input type="range" id="bowl_${i}" min="0" max="100" value="50" oninput="document.getElementById('val_bowl_${i}').innerText=this.value">
+                                    </div>
+                                </div>
+
+                                <hr class="section-divider">
+
+                                <!-- Bagian Bawah: Rebutan & Pelanggaran -->
+                                <div class="card-section-bottom">
+                                    <div class="section-subtitle">⚡ Bagian 2: Sesi Rebutan</div>
+                                    
+                                    <button type="button" id="btn_rebutan_${i}" class="btn-rebutan-benar" onclick="toggleRebutanBenar(${i})">
+                                        <span id="icon_rebutan_${i}">◯</span> Jawaban Benar (+20)
+                                    </button>
+
+                                    <div class="pelanggaran-box">
+                                        <span>Pelanggaran (-10/x):</span>
+                                        <div class="counter-group">
+                                            <button type="button" class="btn-counter" onclick="ubahPelanggaran(${i}, -1)">-</button>
+                                            <span id="val_pelanggaran_${i}" class="counter-value">0</span>
+                                            <button type="button" class="btn-counter" onclick="ubahPelanggaran(${i}, 1)">+</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <!-- BABAK II -->
+        <div id="babak2" class="tab-content">
+            <div class="grid-penilaian">
+                <script>
+                    for(let i=1; i<=4; i++) {
+                        document.write(`
+                            <div class="card-babak card-p-${i}">
+                                <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                                <div class="form-group">
+                                    <label>Nyala Bara <span id="val_bara_${i}">50</span></label>
+                                    <input type="range" id="bara_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_bara_${i}').innerText=this.value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Durasi Waktu <span id="val_waktu_txt_${i}">07:30</span></label>
+                                    <input type="range" id="waktu_${i}" min="240" max="720" step="1" value="450" oninput="updateWaktuLabel(${i}, this.value)">
+                                </div>
+                                <div class="form-group">
+                                    <label>Manajemen 5R <span id="val_5r_${i}">50</span></label>
+                                    <input type="range" id="5r_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_5r_${i}').innerText=this.value">
+                                </div>
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <!-- BABAK III -->
+        <div id="babak3" class="tab-content">
+            <div class="grid-penilaian">
+                <script>
+                    for(let i=1; i<=4; i++) {
+                        document.write(`
+                            <div class="card-babak card-p-${i}">
+                                <div class="card-header"><span class="txt-nama-${i}">Paroki ${i}</span></div>
+                                <div class="form-group">
+                                    <label>Ayunan Wiruk <span id="val_dupa_${i}">50</span></label>
+                                    <input type="range" id="dupa_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_dupa_${i}').innerText=this.value">
+                                </div>
+                                <div class="form-group">
+                                    <label>Gestur / Sikap <span id="val_sikap_${i}">50</span></label>
+                                    <input type="range" id="sikap_${i}" min="1" max="100" value="50" oninput="document.getElementById('val_sikap_${i}').innerText=this.value">
+                                </div>
+                            </div>
+                        `);
+                    }
+                </script>
+            </div>
+        </div>
+
+        <!-- SUBMIT BUTTON -->
+        <div class="submit-container">
+            <button class="btn-submit" onclick="prosesSubmitOtomatis()">🔒 KUNCI & SUBMIT HASIL AKHIR</button>
+        </div>
+
+        <!-- REKAP HASIL -->
+        <div id="kotak_hasil" class="hasil-box">
+            <div id="area_foto" class="table-container-capture">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                    <img src="logo.png" alt="Logo TAPA 2026" style="height: 50px; border-radius: 6px;" onerror="this.style.display='none'">
+                    <div>
+                        <h3 style="margin: 0; color: var(--primary-navy);">🏆 Rekapitulasi Hasil Lomba Wiruk</h3>
+                        <p style="margin: 2px 0 0 0; font-size: 11px; color: #64748b;">TAPA 2026 Official Scorecard</p>
+                    </div>
+                </div>
+                
+                <div id="info_rekap" style="font-size: 13px; color: #334155; margin-bottom: 12px; line-height: 1.5;"></div>
+                
+                <table class="table-hasil">
+                    <thead>
+                        <tr>
+                            <th>Peringkat</th>
+                            <th>Nama Paroki</th>
+                            <th>Teori (25%)</th>
+                            <th>Bara (15%)</th>
+                            <th>Waktu (25%)</th>
+                            <th>5R (10%)</th>
+                            <th>Pendupaan (15%)</th>
+                            <th>Sikap (10%)</th>
+                            <th>Total Skor</th>
+                        </tr>
+                    </thead>
+                    <tbody id="body_tabel_hasil"></tbody>
+                </table>
+            </div>
+
+            <!-- Tombol Aksi Tambahan -->
+            <div class="action-rekap-box">
+                <button class="btn-action-download" onclick="unduhGambarRekapManual()">💾 Unduh Gambar Rekap</button>
+                <button class="btn-action-wa" onclick="kirimPesanWAManual()">📲 Kirim Ke WhatsApp Admin</button>
+            </div>
+        </div>
+
+        <!-- FOOTER WEB LENGKAP (Hanya tampil saat di layar Scoresheet) -->
+        <footer class="main-footer">
+            <div class="footer-container">
+                <div class="footer-links">
+                    <a href="https://www.instagram.com/tapa26_barto/" target="_blank" class="footer-icon-link" title="Instagram">
+                        <i class="bi bi-instagram"></i>
+                    </a>
+                    <a href="https://wa.me/6287730071998" target="_blank" class="footer-icon-link" title="WhatsApp Admin">
+                        <i class="bi bi-whatsapp"></i>
+                    </a>
+                </div>
+                <div class="footer-credit">
+                    © 2026 TAPA - by <strong>Leonard Raditya</strong>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+</div>
+
+<script>
+// Global State
+let selectedRebutanParoki = null;
+let dataPelanggaran = { 1: 0, 2: 0, 3: 0, 4: 0 };
+let globalHasilData = [];
+let globalBlobURL = null;
+let globalPesanWA = "";
+let globalNamaJuri = "";
+
+function toggleInputParoki() {
+    let jml = document.getElementById("input_jumlah_paroki").value;
+    document.getElementById("box_input_p4").style.display = (jml === "3") ? "none" : "flex";
+}
+
+function simpanDataDanMulai(e) {
+    e.preventDefault();
+
+    let namaJuri = document.getElementById("input_nama_juri").value.trim();
+    let jmlPeserta = parseInt(document.getElementById("input_jumlah_paroki").value);
+
+    document.getElementById("display_juri_name").innerText = namaJuri;
+
+    for (let i = 1; i <= 4; i++) {
+        let namaParoki = document.getElementById(`input_p${i}`).value.trim() || `Paroki ${i}`;
+        let elements = document.getElementsByClassName(`txt-nama-${i}`);
+        for (let j = 0; j < elements.length; j++) {
+            elements[j].innerText = namaParoki;
+        }
+
+        let kartuList = document.getElementsByClassName(`card-p-${i}`);
+        for (let k = 0; k < kartuList.length; k++) {
+            kartuList[k].style.display = (i > jmlPeserta) ? "none" : "block";
+        }
+    }
+
+    document.getElementById("screen-setup").style.display = "none";
+    document.getElementById("screen-scoresheet").style.display = "block";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function kembaliKeSetup() {
+    document.getElementById("screen-scoresheet").style.display = "none";
+    document.getElementById("screen-setup").style.display = "block";
+}
+
+function bukaBabak(btnElemen, babakId) {
+    let tabcontent = document.getElementsByClassName("tab-content");
+    for (let i = 0; i < tabcontent.length; i++) tabcontent[i].classList.remove("active");
+    
+    let tablinks = document.getElementsByClassName("tab-btn");
+    for (let i = 0; i < tablinks.length; i++) tablinks[i].classList.remove("active");
+    
+    document.getElementById(babakId).classList.add("active");
+    btnElemen.classList.add("active");
+}
+
+function updateWaktuLabel(id, totalDetik) {
+    let m = Math.floor(totalDetik / 60);
+    let s = totalDetik % 60;
+    document.getElementById(`val_waktu_txt_${id}`).innerText = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s + " Menit";
+}
+
+// Logic Fitur Rebutan Single Selection (Fail-Safe)
+function toggleRebutanBenar(parokiIdx) {
+    if (selectedRebutanParoki === parokiIdx) {
+        selectedRebutanParoki = null;
+    } else {
+        selectedRebutanParoki = parokiIdx;
+    }
+
+    for (let i = 1; i <= 4; i++) {
+        let btn = document.getElementById(`btn_rebutan_${i}`);
+        let icon = document.getElementById(`icon_rebutan_${i}`);
+        
+        if (i === selectedRebutanParoki) {
+            btn.classList.add('active');
+            icon.innerText = "✓";
+        } else {
+            btn.classList.remove('active');
+            icon.innerText = "◯";
+        }
+    }
+}
+
+// Logic Counter Pelanggaran
+function ubahPelanggaran(parokiIdx, delta) {
+    dataPelanggaran[parokiIdx] = Math.max(0, dataPelanggaran[parokiIdx] + delta);
+    document.getElementById(`val_pelanggaran_${parokiIdx}`).innerText = dataPelanggaran[parokiIdx];
+}
+
+function prosesSubmitOtomatis() {
+    let jumlahPeserta = parseInt(document.getElementById("input_jumlah_paroki").value);
+    globalNamaJuri = document.getElementById("input_nama_juri").value || "Juri Tanpa Nama";
+    let waktuSekarang = new Date().toLocaleString('id-ID');
+    globalHasilData = [];
+
+    for(let i = 1; i <= jumlahPeserta; i++) {
+        let nama = document.getElementById(`input_p${i}`).value || `Paroki ${i}`;
+        
+        let skorBowl = (parseFloat(document.getElementById(`bowl_${i}`).value)*80/100) || 0;
+        let poinRebutan = (selectedRebutanParoki === i) ? 20 : 0;
+        let penalti = (dataPelanggaran[i] || 0) * 10;
+        
+        let skorTeori = Math.max(0, skorBowl + poinRebutan - penalti);
+
+        let skorBara = parseFloat(document.getElementById(`bara_${i}`).value);
+        let totalDetikWaktu = parseInt(document.getElementById(`waktu_${i}`).value);
+        let skor5R = parseFloat(document.getElementById(`5r_${i}`).value);
+        let skorWaktu = (totalDetikWaktu < 480) ? 100 : 90;
+
+        let skorDupa = parseFloat(document.getElementById(`dupa_${i}`).value);
+        let skorSikap = parseFloat(document.getElementById(`sikap_${i}`).value);
+
+        let totalNilai = (skorTeori * 0.25) + (skorBara * 0.15) + (skorWaktu * 0.25) + (skor5R * 0.10) + (skorDupa * 0.15) + (skorSikap * 0.10);
+
+        let m = Math.floor(totalDetikWaktu / 60);
+        let s = totalDetikWaktu % 60;
+        let stringWaktu = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+
+        globalHasilData.push({
+            nama: nama, teori: skorTeori, bara: skorBara, waktu: skorWaktu, mmss: stringWaktu, m5r: skor5R, dupa: skorDupa, sikap: skorSikap, total: totalNilai
+        });
+    }
+
+    globalHasilData.sort((a, b) => b.total - a.total);
+
+    let htmlTabel = "";
+    globalHasilData.forEach((data, index) => {
+        let kelasRank = (index === 0) ? "class='rank-1'" : "";
+        htmlTabel += `
+            <tr ${kelasRank}>
+                <td>${index + 1}</td>
+                <td style="text-align: left; font-weight: bold;">${data.nama}</td>
+                <td>${data.teori.toFixed(1)}</td>
+                <td>${data.bara}</td>
+                <td>${data.waktu} (${data.mmss})</td>
+                <td>${data.m5r}</td>
+                <td>${data.dupa}</td>
+                <td>${data.sikap}</td>
+                <td style="font-size: 15px; font-weight: bold; color: var(--accent-pink);">${data.total.toFixed(2)}</td>
+            </tr>
+        `;
+    });
+
+    document.getElementById("body_tabel_hasil").innerHTML = htmlTabel;
+    document.getElementById("info_rekap").innerHTML = `👤 <b>Juri:</b> ${globalNamaJuri} | ⏱️ <b>Timestamp:</b> ${waktuSekarang}`;
+    
+    let kotakHasil = document.getElementById("kotak_hasil");
+    kotakHasil.style.display = "block";
+    kotakHasil.scrollIntoView({ behavior: 'smooth' });
+
+    let nomorWA = "6287780386016"; 
+    globalPesanWA = `🏆 *REKAP HASIL PENILAIAN LOMBA WIRUK (TAPA 2026)* 🏆\n`;
+    globalPesanWA += `👤 *Nama Juri:* ${globalNamaJuri}\n`;
+    globalPesanWA += `⏱️ *Timestamp:* ${waktuSekarang}\n`;
+    globalPesanWA += `==================================\n\n`;
+    
+    globalHasilData.forEach((data, index) => {
+        let medali = (index === 0) ? "🥇 " : (index === 1) ? "🥈 " : (index === 2) ? "🥉 " : "• ";
+        globalPesanWA += `${medali}*PERINGKAT ${index + 1}: ${data.nama.toUpperCase()}*\n`;
+        globalPesanWA += `   👉 *TOTAL SKOR AKHIR: ${data.total.toFixed(2)}*\n`;
+        globalPesanWA += `----------------------------------\n`;
+    });
+    globalPesanWA += `\n_Catatan: File rekap JPG telah terunduh otomatis. Mohon lampirkan gambar tersebut pada chat ini._`;
+
+    setTimeout(() => {
+        autoGenerateImageAndRedirectWA(nomorWA);
+    }, 400);
+}
+
+function autoGenerateImageAndRedirectWA(nomorWA) {
+    let targetArea = document.getElementById("area_foto");
+    
+    let waWindow = window.open("", "_blank");
+    let urlWA = `https://wa.me/${nomorWA}?text=${encodeURIComponent(globalPesanWA)}`;
+    
+    html2canvas(targetArea, { 
+        scale: 2,
+        useCORS: true,
+        allowTaint: false,
+        logging: false,
+        imageTimeout: 1500
+    }).then(canvas => {
+        canvas.toBlob(function(blob) {
+            if (blob) {
+                globalBlobURL = URL.createObjectURL(blob);
+                
+                let linkUnduh = document.createElement("a");
+                let cleanJuriName = globalNamaJuri.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+                linkUnduh.download = `Rekap_Wiruk_${cleanJuriName}_${Date.now()}.jpg`;
+                linkUnduh.href = globalBlobURL;
+                document.body.appendChild(linkUnduh);
+                linkUnduh.click();
+                document.body.removeChild(linkUnduh);
+            }
+            
+            if (waWindow && !waWindow.closed) {
+                waWindow.location.href = urlWA;
+            } else {
+                window.location.href = urlWA;
+        }
+    }, 'image/jpeg', 0.95);
+}).catch(err => {
+    console.error("Gagal membuat screenshot:", err);
+    if (waWindow && !waWindow.closed) {
+        waWindow.location.href = urlWA;
+    } else {
+        window.location.href = urlWA;
+}
+});
+}
+
+
+function unduhGambarRekapManual() {
+    let targetArea = document.getElementById("area_foto");
+    html2canvas(targetArea, { scale: 2, useCORS: true, allowTaint: false }).then(canvas => {
+        canvas.toBlob(function(blob) {
+            if (blob) {
+                let url = URL.createObjectURL(blob);
+                let link = document.createElement("a");
+                link.download = `Rekap_Wiruk_${Date.now()}.jpg`;
+                link.href = url;
+                link.click();
+            }
+        }, 'image/jpeg', 0.95);
+    });
+}
+
+function kirimPesanWAManual() {
+    let nomorWA = "6287780386016";
+    let urlWA = `https://wa.me/${nomorWA}?text=${encodeURIComponent(globalPesanWA)}`;
+    window.open(urlWA, "_blank");
+}
+</script>
+
+</body>
+</html>
