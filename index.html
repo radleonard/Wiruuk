@@ -446,7 +446,7 @@
                                     <div class="section-subtitle">⚡ Bagian 2: Sesi Rebutan</div>
                                     
                                     <button type="button" id="btn_rebutan_${i}" class="btn-rebutan-benar" onclick="toggleRebutanBenar(${i})">
-                                        <span id="icon_rebutan_${i}">◯</span> Jawaban Benar (+20)
+                                        <span id="icon_rebutan_${i}">◯</span> Jawaban Benar 
                                     </button>
 
                                     <div class="pelanggaran-box">
@@ -479,7 +479,7 @@
                                 </div>
                                 <div class="form-group">
                                     <label>Durasi Waktu <span id="val_waktu_txt_${i}">07:30</span></label>
-                                    <input type="range" id="waktu_${i}" min="240" max="720" step="1" value="450" oninput="updateWaktuLabel(${i}, this.value)">
+                                    <input type="range" id="waktu_${i}" min="210" max="600" step="1" value="450" oninput="updateWaktuLabel(${i}, this.value)">
                                 </div>
                                 <div class="form-group">
                                     <label>Manajemen 5R <span id="val_5r_${i}">50</span></label>
@@ -678,8 +678,8 @@ function prosesSubmitOtomatis() {
     for(let i = 1; i <= jumlahPeserta; i++) {
         let nama = document.getElementById(`input_p${i}`).value || `Paroki ${i}`;
         
-        let skorBowl = (parseFloat(document.getElementById(`bowl_${i}`).value)*80/100) || 0;
-        let poinRebutan = (selectedRebutanParoki === i) ? 20 : 0;
+        let skorBowl = (parseFloat(document.getElementById(`bowl_${i}`).value)*75/100) || 0;
+        let poinRebutan = (selectedRebutanParoki === i) ? 25 : 0;
         let penalti = (dataPelanggaran[i] || 0) * 10;
         
         let skorTeori = Math.max(0, skorBowl + poinRebutan - penalti);
