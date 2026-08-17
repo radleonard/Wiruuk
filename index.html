@@ -842,8 +842,16 @@ function prosesSubmitOtomatis() {
         let skorBara = parseFloat(document.getElementById(`bara_${i}`).value) || 0;
         let totalDetikWaktu = parseInt(document.getElementById(`waktu_${i}`).value) || 0;
         let skor5R = parseFloat(document.getElementById(`5r_${i}`).value) || 0;
-        let skorWaktu = (totalDetikWaktu < 480 && totalDetikWaktu > 0) ? 100 : 90;
+    
+        // let skorWaktu = (totalDetikWaktu < 480 && totalDetikWaktu > 0) ? 100 : 90;
 
+        let skorWaktu = 
+            totalDetikWaktu < 60*6 ? 100 : 
+            totalDetikWaktu >= 60*6 && totalDetikWaktu < 60*7 ? 90 : 
+            totalDetikWaktu >= 60*7 && totalDetikWaktu < 60*8 ? 80 : 
+            totalDetikWaktu >= 60*8 && totalDetikWaktu < 60*9 ? 70 :
+            60;
+        
         let skorDupa = parseFloat(document.getElementById(`dupa_${i}`).value) || 0;
         let skorSikap = parseFloat(document.getElementById(`sikap_${i}`).value) || 0;
 
